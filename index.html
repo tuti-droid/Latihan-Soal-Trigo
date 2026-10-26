@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Utama Trigonometri XI SMK</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2pdf.js library for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Format Pecahan Lurus Vertikal Tegas (Clear Numerator/Denominator) */
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            vertical-align: middle;
+            text-align: center;
+            padding: 0 6px;
+        }
+        .fraction .numerator {
+            border-bottom: 2.5px solid currentColor;
+            padding-bottom: 2px;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+        .fraction .denominator {
+            padding-top: 2px;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+        /* Custom scrollbars */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 bg-slate-50 flex flex-col justify-between">
+
+    <!-- Header Navigation -->
+    <header class="bg-indigo-700 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/10 p-2 rounded-xl backdrop-blur-md">
+                    <i class="fa-solid fa-shapes text-2xl text-yellow-300"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">Kuis Evaluasi Trigonometri XI SMK</h1>
+                    <p class="text-xs text-indigo-200">20 Soal Bertingkat | Durasi 100 Menit (Max 5 Mnt/Soal)</p>
+                </div>
+            </div>
+
+            <!-- Mode Switch / Admin Portal Button -->
+            <div id="header-actions" class="flex gap-2">
+                <button onclick="showAdminModal()" class="bg-indigo-800 hover:bg-indigo-900 text-indigo-100 text-xs sm:text-sm px-3.5 py-2 rounded-xl font-semibold flex items-center gap-2 transition shadow">
+                    <i class="fa-solid fa-user-tie text-yellow-400"></i> Mode Guru
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto px-4 py-6 w-full flex-grow">
+
+        <!-- STEP 1: IDENTITAS SISWA & ATURAN UJIAN -->
+        <div id="student-login-card" class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-slate-100 transition-all">
+            <div class="text-center max-w-lg mx-auto mb-6">
+                <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Identitas Siswa</span>
+                <h2 class="text-2xl font-extrabold text-slate-800 mt-2">Kuis Evaluasi Trigonometri XI SMK</h2>
+                <p class="text-xs text-slate-500 mt-1">Lengkapi identitas diri di bawah ini untuk memulai pengerjaan.</p>
+            </div>
+
+            <!-- Petunjuk & Aturan Ketat -->
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 max-w-xl mx-auto text-amber-900 text-xs space-y-2">
+                <div class="font-bold flex items-center gap-2 text-amber-800 text-sm">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-600 text-base"></i> Catatan & Aturan Penting Kuis:
+                </div>
+                <ul class="list-disc list-inside space-y-1 font-medium pl-1 text-slate-700">
+                    <li><b>Satu Kali Pengerjaan:</b> Setiap siswa hanya berhak mengerjakan kuis ini sebanyak 1 (satu) kali.</li>
+                    <li><b>Pengaturan Waktu:</b> Total waktu 100 menit. Setiap 1 soal diberikan batas waktu maksimal <b>5 menit</b>.</li>
+                    <li><b>Pindah Otomatis:</b> Waktu per soal berjalan otomatis. Saat waktu habis, soal akan otomatis berpindah ke nomor berikutnya.</li>
+                    <li><b>Larangan Buka Aplikasi Lain:</b> Dilarang berpindah browser, membuka tab lain, atau keluar dari aplikasi saat kuis berlangsung.
+                        <br><span class="text-rose-600 font-bold ml-4">* Jika membuka/berpindah aplikasi lain, sistem akan mencatat pelanggaran pada hasil akhir pengerjaan.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <form id="student-login-form" onsubmit="handleStudentLogin(event)" class="max-w-md mx-auto space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Nama Lengkap Siswa</label>
+                    <input type="text" id="student-name" required placeholder="Contoh: Muhammad Rizky" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-800 font-medium">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Nomor Induk Siswa (NIS/NISN)</label>
+                    <input type="number" id="student-id" required placeholder="Contoh: 210948" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-800 font-medium">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Kelas</label>
+                    <select id="student-class" required class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-800 font-medium bg-white">
+                        <option value="">-- Pilih Kelas --</option>
+                        <option value="XI Kuliner">XI Kuliner</option>
+                        <option value="XI SIJA">XI SIJA</option>
+                    </select>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-indigo-200 transition duration-200 flex items-center justify-center gap-2 text-base">
+                        <span>Mulai Mengerjakan Kuis</span>
+                        <i class="fa-solid fa-play text-sm"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- STEP 2: PANELS SOAL KUIS (Siswa) -->
+        <div id="quiz-container" class="hidden space-y-5">
+            
+            <!-- Sticky Timer Bar -->
+            <div class="bg-white rounded-2xl p-4 shadow-md border border-slate-100 flex flex-wrap justify-between items-center gap-3 sticky top-16 z-40">
+                <div class="flex items-center gap-2">
+                    <div class="bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm border border-indigo-100 flex items-center gap-2">
+                        <i class="fa-solid fa-user text-indigo-600"></i>
+                        <span id="quiz-student-info">-</span>
+                    </div>
+                    <!-- Indicator Violations Count -->
+                    <div id="tab-warning-badge" class="hidden bg-rose-100 text-rose-700 px-2.5 py-1 rounded-xl text-xs font-extrabold flex items-center gap-1 border border-rose-200">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span id="tab-warning-count">0 Pindah Tab</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <!-- Timer Per Soal (5 Menit) -->
+                    <div class="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl">
+                        <i class="fa-solid fa-stopwatch text-rose-600 animate-pulse text-xs"></i>
+                        <span class="text-xs font-semibold text-rose-800">Soal:</span>
+                        <span id="q-timer-display" class="font-mono text-rose-700 font-bold text-sm sm:text-base">05:00</span>
+                    </div>
+
+                    <!-- Timer Total Kuis (100 Menit) -->
+                    <div class="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl">
+                        <i class="fa-solid fa-clock text-amber-600 text-xs"></i>
+                        <span class="text-xs font-semibold text-amber-800">Total:</span>
+                        <span id="total-timer-display" class="font-mono text-amber-700 font-bold text-sm sm:text-base">100:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Single Question Render View -->
+            <div id="single-question-box" class="bg-white rounded-2xl p-6 shadow-md border border-slate-100 space-y-5">
+                <!-- Dynamically populated per question -->
+            </div>
+
+            <!-- Navigation Bar -->
+            <div class="flex justify-between items-center pt-2">
+                <span id="question-progress-text" class="text-xs font-bold text-slate-500">Soal 1 dari 20</span>
+                <button id="btn-next-question" onclick="nextQuestion(false)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm px-6 py-2.5 rounded-xl shadow-md transition flex items-center gap-2">
+                    <span>Soal Berikutnya</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 3: HASIL KUIS SISWA (Tanpa Pembahasan) -->
+        <div id="student-result-card" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl shadow-xl p-8 border border-slate-100 text-center">
+                <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h2 class="text-2xl font-extrabold text-slate-800">Kuis Selesai Terkirim!</h2>
+                <p class="text-slate-500 text-sm mt-1">Terima kasih telah menyelesaikan evaluasi trigonometri.</p>
+
+                <div class="bg-slate-50 rounded-2xl p-6 max-w-sm mx-auto my-6 border border-slate-200">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Nilai Akhir Kuis</p>
+                    <div id="final-score-display" class="text-5xl font-black text-indigo-600 my-2">0</div>
+                    <p id="score-details" class="text-sm font-semibold text-slate-600">0 dari 20 Soal Benar</p>
+                </div>
+
+                <!-- Status Deteksi Kecurangan/Pindah Tab -->
+                <div id="cheating-status-box" class="max-w-md mx-auto mb-4 p-3.5 rounded-xl text-xs font-semibold text-left">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl text-indigo-800 text-xs font-medium max-w-md mx-auto">
+                    <i class="fa-solid fa-cloud-arrow-up text-indigo-600 mr-1"></i> Nilai Anda telah otomatis direkap dan dikirimkan secara langsung ke database Guru.
+                </div>
+            </div>
+        </div>
+
+        <!-- MODE GURU: DASHBOARD REKAP NILAI JARAK JAUH -->
+        <div id="admin-dashboard" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 shadow-xl border border-slate-100 flex flex-wrap justify-between items-center gap-4">
+                <div>
+                    <span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Panel Akses Guru</span>
+                    <h2 class="text-2xl font-bold text-slate-800 mt-1">Rekap Nilai Siswa (Cloud Real-Time)</h2>
+                    <p class="text-xs text-slate-500">Merekap otomatis hasil pengerjaan kuis siswa kelas XI Kuliner & XI SIJA</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="exportToPDF()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow">
+                        <i class="fa-solid fa-file-pdf"></i> Unduh PDF
+                    </button>
+                    <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow">
+                        <i class="fa-solid fa-file-excel"></i> Unduh CSV
+                    </button>
+                    <button onclick="exitAdminMode()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold">
+                        Keluar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <p class="text-xs text-slate-400 font-bold uppercase">Sudah Mengerjakan</p>
+                    <h3 id="stat-submitted" class="text-3xl font-extrabold text-indigo-600 mt-1">0</h3>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <p class="text-xs text-slate-400 font-bold uppercase">Rata-Rata Nilai</p>
+                    <h3 id="stat-average" class="text-3xl font-extrabold text-emerald-600 mt-1">0</h3>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <p class="text-xs text-slate-400 font-bold uppercase">Filter Kelas</p>
+                    <select id="filter-class" onchange="renderAdminTable()" class="mt-2 w-full p-2 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50">
+                        <option value="ALL">Semua Kelas (XI Kuliner & XI SIJA)</option>
+                        <option value="XI Kuliner">XI Kuliner</option>
+                        <option value="XI SIJA">XI SIJA</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Table Grades -->
+            <div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs uppercase tracking-wider">
+                                <th class="p-4">No</th>
+                                <th class="p-4">Nama Siswa</th>
+                                <th class="p-4">NIS</th>
+                                <th class="p-4">Kelas</th>
+                                <th class="p-4">Status Pengawasan</th>
+                                <th class="p-4">Waktu Selesai</th>
+                                <th class="p-4 text-center">Nilai Akhir</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grades-table-body" class="divide-y divide-slate-100 text-sm">
+                            <!-- Filled dynamically from Cloud -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal PIN Guru (PIN Rahasia: 3403) -->
+    <div id="admin-pin-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center">
+            <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800">Verifikasi Akses Guru</h3>
+            <p class="text-xs text-slate-500 mb-4">Masukkan PIN Keamanan Guru untuk membuka rekap nilai</p>
+            
+            <input type="password" id="admin-pin-input" placeholder=" PIN 4-Digit" maxlength="4" class="w-full text-center text-2xl tracking-widest font-bold py-3 rounded-xl border border-slate-300 mb-4 focus:ring-2 focus:ring-indigo-500">
+
+            <div class="flex gap-2">
+                <button onclick="hideAdminModal()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-600 py-2.5 rounded-xl font-bold text-sm">Batal</button>
+                <button onclick="verifyAdminPIN()" class="w-1/2 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-sm shadow">Masuk</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal Custom -->
+    <div id="alert-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center">
+            <div id="alert-icon" class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl"></div>
+            <h3 id="alert-title" class="text-lg font-bold text-slate-800"></h3>
+            <p id="alert-msg" class="text-xs text-slate-500 mb-5 leading-relaxed"></p>
+            <button onclick="closeAlertModal()" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-2.5 rounded-xl font-bold text-sm">Tutup</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400 mt-auto">
+        Kuis Trigonometri Bertingkat XI SMK &copy; 2026
+    </footer>
+
+    <!-- Firebase SDK Modules -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration setup
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'trigo-smk-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyDummyKeyForFallbackPurposeOnly",
+            authDomain: "trigo-app.firebaseapp.com",
+            projectId: "trigo-app",
+            storageBucket: "trigo-app.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let gradesList = [];
+
+        // Authenticate user anonymously or with custom token
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    const userCred = await signInWithCustomToken(auth, __initial_auth_token);
+                    currentUser = userCred.user;
+                } else {
+                    const userCred = await signInAnonymously(auth);
+                    currentUser = userCred.user;
+                }
+                listenToGrades();
+            } catch (err) {
+                console.error("Auth Failed:", err);
+            }
+        }
+        initAuth();
+
+        // Realtime Firestore Listener for Admin Grade Recap
+        function listenToGrades() {
+            if (!currentUser) return;
+            const gradesColRef = collection(db, 'artifacts', appId, 'public', 'data', 'grades');
+            
+            onSnapshot(gradesColRef, (snapshot) => {
+                gradesList = [];
+                snapshot.forEach((doc) => {
+                    gradesList.push(doc.data());
+                });
+                // Sort by timestamp
+                gradesList.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                window.allGradesData = gradesList;
+                if (window.isAdminActive) {
+                    renderAdminTable();
+                }
+            }, (error) => {
+                console.error("Firestore Listen Error:", error);
+            });
+        }
+
+        // Save Grade to Cloud Firestore
+        window.saveGradeToCloud = async function(studentData) {
+            if (!currentUser) return false;
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'grades', `student_${studentData.nis}`);
+                await setDoc(docRef, studentData);
+                return true;
+            } catch (err) {
+                console.error("Save Grade Error:", err);
+                return false;
+            }
+        };
+    </script>
+
+    <!-- Main Application Logic Script -->
+    <script>
+        const SECRET_PIN = "3403";
+        let activeStudent = null;
+        let currentQuestionIdx = 0;
+        let studentAnswers = {}; // { qId: selectedVal }
+        let tabSwitchCount = 0; // Deteksi berpindah tab/aplikasi
+        let isQuizActive = false;
+
+        // Timers
+        let totalTimerInterval = null;
+        let totalTimeRemaining = 100 * 60; // 100 Minutes in Seconds
+        
+        let questionTimerInterval = null;
+        let questionTimeRemaining = 5 * 60; // Max 5 Minutes per question
+
+        // BANK 20 SOAL BERTINGKAT (Sesuai Materi)
+        const questions = [
+            // LEVEL 1 - 4: Konversi Derajat <-> Radian
+            {
+                id: 1,
+                level: "Level 1: Konversi Derajat ke Radian",
+                question: "Ubah besar sudut <b>30°</b> ke dalam bentuk radian!",
+                visualSvg: `
+                    <svg viewBox="0 0 200 110" class="w-48 h-28 mx-auto">
+                        <circle cx="100" cy="85" r="55" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="4"/>
+                        <line x1="100" y1="85" x2="155" y2="85" stroke="#334155" stroke-width="3"/>
+                        <line x1="100" y1="85" x2="148" y2="57" stroke="#4f46e5" stroke-width="3"/>
+                        <path d="M 125 85 A 25 25 0 0 0 121 72" fill="none" stroke="#e11d48" stroke-width="3"/>
+                        <text x="130" y="70" fill="#e11d48" font-weight="bold" font-size="13">30°</text>
+                    </svg>
+                `,
+                options: [
+                    { html: `<div class="fraction"><span class="numerator">1</span><span class="denominator">6</span></div> π rad`, val: "1/6" },
+                    { html: `<div class="fraction"><span class="numerator">1</span><span class="denominator">4</span></div> π rad`, val: "1/4" },
+                    { html: `<div class="fraction"><span class="numerator">1</span><span class="denominator">3</span></div> π rad`, val: "1/3" },
+                    { html: `<div class="fraction"><span class="numerator">1</span><span class="denominator">2</span></div> π rad`, val: "1/2" }
+                ],
+                correct: "1/6"
+            },
+            {
+                id: 2,
+                level: "Level 2: Konversi Derajat ke Radian",
+                question: "Berapakah bentuk radian dari sudut <b>90°</b>?",
+                visualSvg: `
+                    <svg viewBox="0 0 200 110" class="w-48 h-28 mx-auto">
+                        <line x1="40" y1="85" x2="160" y2="85" stroke="#cbd5e1" stroke-width="2"/>
+                        <line x1="100" y1="85" x2="160" y2="85" stroke="#334155" stroke-width="3"/>
+                        <line x1="100" y1="85" x2="100" y2="25" stroke="#4f46e5" stroke-width="3"/>
+                        <rect x="100" y="70" width="15" height="15" fill="none" stroke="#e11d48" stroke-width="2"/>
+                        <text x="120" y="55" fill="#e11d48" font-weight="bold" font-size="13">90°</text>
+                    </svg>
+                `,
+                options: [
+                    { html: `<div class="fraction"><span class="numerator">1</span><span class="denominator">4</span></div> π rad`, val: "1/4" },
+                    { html: `<div class="fraction"><span class="numerator">1</span><span class="denominator">3</span></div> π rad`, val: "1/3" },
+                    { html: `<div class="fraction"><span class="numerator">1</span><span class="denominator">2</span></div> π rad`, val: "1/2" },
+                    { html: `1 π rad`, val: "1" }
+                ],
+                correct: "1/2"
+            },
+            {
+                id: 3,
+                level: "Level 3: Konversi Radian ke Derajat",
+                question: "Ubah bentuk radian <div class='fraction'><span class='numerator'>1</span><span class='denominator'>3</span></div> π rad ke dalam satuan derajat!",
+                visualSvg: `
+                    <svg viewBox="0 0 200 110" class="w-48 h-28 mx-auto">
+                        <circle cx="100" cy="85" r="55" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="4"/>
+                        <line x1="100" y1="85" x2="155" y2="85" stroke="#334155" stroke-width="3"/>
+                        <line x1="100" y1="85" x2="128" y2="37" stroke="#4f46e5" stroke-width="3"/>
+                        <path d="M 125 85 A 25 25 0 0 0 113 63" fill="none" stroke="#e11d48" stroke-width="3"/>
+                        <text x="110" y="52" fill="#e11d48" font-weight="bold" font-size="12">θ = ?</text>
+                    </svg>
+                `,
+                options: [
+                    { html: "45°", val: "45" },
+                    { html: "60°", val: "60" },
+                    { html: "90°", val: "90" },
+                    { html: "120°", val: "120" }
+                ],
+                correct: "60"
+            },
+            {
+                id: 4,
+                level: "Level 4: Konversi Radian ke Derajat",
+                question: "Ubah bentuk radian <div class='fraction'><span class='numerator'>3</span><span class='denominator'>4</span></div> π rad ke dalam derajat!",
+                visualSvg: `
+                    <svg viewBox="0 0 200 110" class="w-48 h-28 mx-auto">
+                        <line x1="40" y1="85" x2="160" y2="85" stroke="#cbd5e1" stroke-width="2"/>
+                        <line x1="100" y1="85" x2="160" y2="85" stroke="#334155" stroke-width="3"/>
+                        <line x1="100" y1="85" x2="61" y2="46" stroke="#4f46e5" stroke-width="3"/>
+                        <path d="M 125 85 A 25 25 0 0 0 82 67" fill="none" stroke="#e11d48" stroke-width="3"/>
+                        <text x="85" y="55" fill="#e11d48" font-weight="bold" font-size="12">θ = ?</text>
+                    </svg>
+                `,
+                options: [
+                    { html: "120°", val: "120" },
+                    { html: "135°", val: "135" },
+                    { html: "150°", val: "150" },
+                    { html: "225°", val: "225" }
+                ],
+                correct: "135"
+            },
+
+            // LEVEL 5 - 8: Perbandingan Sisi Segitiga Siku-Siku
+            {
+                id: 5,
+                level: "Level 5: Perbandingan Sisi Sinus",
+                question: "Pada segitiga siku-siku di bawah, perbandingan <b>sin θ</b> didefinisikan sebagai...?",
+                visualSvg: `
+                    <svg viewBox="0 0 200 110" class="w-48 h-28 mx-auto">
+                        <polygon points="30,85 170,85 170,25" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2.5"/>
+                        <rect x="155" y="70" width="15" height="15" fill="none" stroke="#4f46e5" stroke-width="1.5"/>
+                        <path d="M 55 85 A 25 25 0 0 0 50 75" fill="none" stroke="#e11d48" stroke-width="2"/>
+                        <text x="60" y="80" fill="#e11d48" font-weight="bold" font-size="12">θ</text>
+                        <text x="100" y="100" fill="#475569" font-weight="bold" font-size="10">Samping (a)</text>
+                        <text x="175" y="60" fill="#475569" font-weight="bold" font-size="10">Depan (b)</text>
+                        <text x="85" y="45" fill="#4f46e5" font-weight="bold" font-size="10">Miring (c)</text>
+                    </svg>
+                `,
+                options: [
+                    { html: `<div class="fraction"><span class="numerator">Depan (b)</span><span class="denominator">Miring (c)</span></div>`, val: "b/c" },
+                    { html: `<div class="fraction"><span class="numerator">Samping (a)</span><span class="denominator">Miring (c)</span></div>`, val: "a/c" },
+                    { html: `<div class="fraction"><span class="numerator">Depan (b)</span><span class="denominator">Samping (a)</span></div>`, val: "b/a" },
+                    { html: `<div class="fraction"><span class="numerator">Miring (c)</span><span class="denominator">Depan (b)</span></div>`, val: "c/b" }
+                ],
+                correct: "b/c"
+            },
+            {
+                id: 6,
+                level: "Level 6: Perbandingan Sisi Cosinus",
+                question: "Pada segitiga siku-siku berikut, perbandingan <b>cos θ</b> didefinisikan sebagai...?",
+                visualSvg: `
+                    <svg viewBox="0 0 200 110" class="w-48 h-28 mx-auto">
+                        <polygon points="30,85 170,85 170,25" fill="#fdf4ff" stroke="#c026d3" stroke-width="2.5"/>
+                        <path d="M 55 85 A 25 25 0 0 0 50 75" fill="none" stroke="#c026d3" stroke-width="2"/>
+                        <text x="60" y="80" fill="#c026d3" font-weight="bold" font-size="12">θ</text>
+                        <text x="100" y="100" fill="#475569" font-weight="bold" font-size="10">Samping (a)</text>
+                        <text x="175" y="60" fill="#475569" font-weight="bold" font-size="10">Depan (b)</text>
+                        <text x="85" y="45" fill="#c026d3" font-weight="bold" font-size="10">Miring (c)</text>
+                    </svg>
+                `,
+                options: [
+                    { html: `<div class="fraction"><span class="numerator">Depan (b)</span><span class="denominator">Miring (c)</span></div>`, val: "b/c" },
+                    { html: `<div class="fraction"><span class="numerator">Samping (a)</span><span class="denominator">Miring (c)</span></div>`, val: "a/c" },
+                    { html: `<div class="fraction"><span class="numerator">Depan (b)</span><span class="denominator">Samping (a)</span></div>`, val: "b/a" },
+                    { html: `<div class="fraction"><span class="numerator">Samping (a)</span><span class="denominator">Depan (b)</span></div>`, val: "a/b" }
+                ],
+                correct: "a/c"
+            },
+            {
+                id: 7,
+                level: "Level 7: Perbandingan Sisi Tangen",
+                question: "Rumus perbandingan untuk menentukan nilai <b>tan θ</b> adalah...?",
+                visualSvg: `
+                    <svg viewBox="0 0 200 110" class="w-48 h-28 mx-auto">
+                        <polygon points="30,85 170,85 170,25" fill="#fef3c7" stroke="#d97706" stroke-width="2.5"/>
+                        <text x="60" y="80" fill="#d97706" font-weight="bold" font-size="12">θ</text>
+                        <text x="100" y="100" fill="#475569" font-weight="bold" font-size="10">Samping (a)</text>
+                        <text x="175" y="60" fill="#475569" font-weight="bold" font-size="10">Depan (b)</text>
+                        <text x="85" y="45" fill="#d97706" font-weight="bold" font-size="10">Miring (c)</text>
+                    </svg>
+                `,
+                options: [
+                    { html: `<div class="fraction"><span class="numerator">Samping (a)</span><span class="denominator">Depan (b)</span></div>`, val: "a/b" },
+                    { html: `<div class="fraction"><span class="numerator">Depan (b)</span><span class="denominator">Samping (a)</span></div>`, val: "b/a" },
+                    { html: `<div class="fraction"><span class="numerator">Depan (b)</span><span class="denominator">Miring (c)</span></div>`, val: "b/c" },
+                    { html: `<div class="fraction"><span class="numerator">Miring (c)</span><span class="denominator">Samping (a)</span></div>`, val: "c/a" }
+                ],
+                correct: "b/a"
+            },
+            {
+                id: 8,
+                level: "Level 8: Perhitungan Sisi Miring (Pythagoras + Sinus)",
+                question: "Diketahui segitiga siku-siku dengan sisi depan = 6 cm dan sisi samping = 8 cm. Nilai <b>sin θ</b> dari sudut θ di bawah adalah...?",
+                visualSvg: `
+                    <svg viewBox="0 0 200 110" class="w-48 h-28 mx-auto">
+                        <polygon points="30,85 170,85 170,25" fill="#f1f5f9" stroke="#0284c7" stroke-width="2.5"/>
+                        <text x="60" y="80" fill="#0284c7" font-weight="bold" font-size="12">θ</text>
+                        <text x="90" y="100" fill="#334155" font-weight="bold" font-size="10">a = 8 cm</text>
+                        <text x="175" y="60" fill="#334155" font-weight="bold" font-size="10">b = 6 cm</text>
+                    </svg>
+                `,
+                options: [
+                    { html: `<div class="fraction"><span class="numerator">3</span><span class="denominator">5</span></div>`, val: "3/5" },
+                    { html: `<div class="fraction"><span class="numerator">4</span><span class="denominator">5</span></div>`, val: "4/5" },
+                    { html: `<div class="fraction"><span class="numerator">3</span><span class="denominator">4</span></div>`, val: "3/4" },
+                    { html: `<div class="fraction"><span class="numerator">1</span><span class="denominator">2</span></div>`, val: "1/2" }
+                ],
+                correct: "3/5"
+            },
+
+            // LEVEL 9 - 12: Nilai Perbandingan Sudut Istimewa
+            {
+                id: 9,
+                level: "Level 9: Sudut Istimewa Sinus",
+                question: "Berapakah nilai dari <b>sin 30°</b>?",
+                visualSvg: `
+                    <svg viewBox="0 0 200 110" class="w-48 h-28 mx-auto">
+                        <polygon points="30,85 170,85 30,15" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2.5"/>
+                        <text x="120" y="80" fill="#1e293b" font-weight="bold" font-size="12">30°</text>
+                    </svg>
+                `,
+                options: [
+                    { html: "0", val: "0" },
+                    { html: `<div class="fraction"><span class="numerator">1</span><span class="denominator">2</span></div>`, val: "1/2" },
+                    { html: `<div class="fraction"><span class="numerator">1</span><span class="denominator">2</span></div> √2`, val: "1/2 sqrt2" },
+                    { html: `<div class="fraction"><span class="numerator">1</span><span class="denominator">2</span></div> √3`, val: "1/2 sqrt3" }
+                ],
+                correct: "1/2"
+            },
+            {
+                id: 10,
+                level: "Level 10: Sudut Istimewa Cosinus",
+                question: "Berapakah nilai dari <b>cos 60°</b>?",
+                visualSvg: `
+                    <svg viewBox="0 0 200 110" class="w-48 h-28 mx-auto">
+                        <polygon points="30,85 170,85 30,15" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2.5"/>
+                        <text x="40" y="40" fill="#1e293b" font-weight="bold" font-size="12">60°</text>
+                    </svg>
+                `,
+                options: [
+                    { html: `<div class="fraction"><span class="numerator">1</span><span class="denominator">2</span></div>`, val: "1/2" },
+                    { html: `<div class="fraction"><span class="numerator">1</span><span class="denominator">2</span></div> √2`, val: "1/2 sqrt2" },
+                    { html: `<div class="fraction"><span class="numerator">1</span><span class="denominator">2</span></div> √3`, val: "1/2 sqrt3" },
+                    { html: "1", val: "1" }
+                ],
+                correct: "1/2"
+            },
+            {
+                id: 11,
+                level: "Level 11: Operasi Sudut Istimewa",
+                question: "Hitunglah hasil dari penjumlahan: <b>sin 30° + cos 60°</b>",
+                visualSvg: `
+                    <svg viewBox="0 0 200 110" class="w-48 h-28 mx-auto">
+                        <rect x="30" y="25" width="140" height="60" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+                        <text x="45" y="60" fill="#4f46e5" font-weight="bold" font-size="14">sin 30° + cos 60° = ?</text>
+                    </svg>
+                `,
+                options: [
+                    { html: `<div class="fraction"><span class="numerator">1</span><span class="denominator">2</span></div>`, val: "1/2" },
+                    { html: "1", val: "1" },
+                    { html: `<div class="fraction"><span class="numerator">1</span><span class="denominator">2</span></div> √3`, val: "1/2 sqrt3" },
+                    { html: "2", val: "2" }
+                ],
+                correct: "1"
+            },
+            {
+                id: 12,
+                level: "Level 12: Pecahan Sudut Istimewa",
+                question: "Hitunglah nilai perbandingan pecahan: <div class='fraction'><span class='numerator'>tan 45°</span><span class='denominator'>cos 0°</span></div>",
+                visualSvg: `
+                    <svg viewBox="0 0 200 110" class="w-48 h-28 mx-auto">
+                        <polygon points="40,85 140,85 40,15" fill="#fef3c7" stroke="#d97706" stroke-width="2.5"/>
+                        <text x="80" y="80" fill="#b45309" font-weight="bold" font-size="12">45°</text>
+                    </svg>
+                `,
+                options: [
+                    { html: "0", val: "0" },
+                    { html: `<div class="fraction"><span class="numerator">1</span><span class="denominator">2</span></div>`, val: "1/2" },
+                    { html: "1", val: "1" },
+                    { html: "2", val: "2" }
+                ],
+                correct: "1"
+            },
+
+            // LEVEL 13 - 16: Sudut Elevasi & Sudut Depresi
+            {
+                id: 13,
+                level: "Level 13: Konsep Sudut Elevasi",
+                question: "Seorang siswa melihat puncak gedung dengan sudut elevasi 45°. Jika jarak siswa ke gedung adalah 10 meter, berapa tinggi gedung (t)?",
+                visualSvg: `
+                    <svg viewBox="0 0 220 120" class="w-56 h-30 mx-auto">
+                        <rect x="160" y="20" width="40" height="85" fill="#94a3b8" stroke="#334155" stroke-width="2"/>
+                        <line x1="20" y1="105" x2="200" y2="105" stroke="#334155" stroke-width="2"/>
+                        <line x1="30" y1="105" x2="160" y2="20" stroke="#e11d48" stroke-width="2" stroke-dasharray="4"/>
+                        <path d="M 50 105 A 20 20 0 0 0 45 95" fill="none" stroke="#e11d48" stroke-width="2"/>
+                        <text x="55" y="100" fill="#e11d48" font-weight="bold" font-size="11">45°</text>
+                        <text x="80" y="118" fill="#1e293b" font-weight="bold" font-size="10">10 meter</text>
+                        <text x="165" y="65" fill="#ffffff" font-weight="bold" font-size="10">tinggi (t)?</text>
+                    </svg>
+                `,
+                options: [
+                    { html: "5 meter", val: "5" },
+                    { html: "10 meter", val: "10" },
+                    { html: "10√3 meter", val: "10sqrt3" },
+                    { html: "20 meter", val: "20" }
+                ],
+                correct: "10"
+            },
+            {
+                id: 14,
+                level: "Level 14: Penerapan Sudut Elevasi (Tinggi Pohon)",
+                question: "Siswa melihat puncak pohon dengan sudut elevasi 30°. Jarak siswa ke pohon 12 meter. Berapakah tinggi pohon tersebut?",
+                visualSvg: `
+                    <svg viewBox="0 0 220 120" class="w-56 h-30 mx-auto">
+                        <line x1="20" y1="105" x2="200" y2="105" stroke="#334155" stroke-width="2"/>
+                        <line x1="30" y1="105" x2="160" y2="35" stroke="#e11d48" stroke-width="2" stroke-dasharray="4"/>
+                        <text x="55" y="100" fill="#e11d48" font-weight="bold" font-size="11">30°</text>
+                        <text x="80" y="118" fill="#1e293b" font-weight="bold" font-size="10">12 meter</text>
+                        <text x="165" y="70" fill="#16a34a" font-weight="bold" font-size="10">Tinggi pohon?</text>
+                    </svg>
+                `,
+                options: [
+                    { html: "4 meter", val: "4" },
+                    { html: "4√3 meter", val: "4sqrt3" },
+                    { html: "6√3 meter", val: "6sqrt3" },
+                    { html: "12√3 meter", val: "12sqrt3" }
+                ],
+                correct: "4sqrt3"
+            },
+            {
+                id: 15,
+                level: "Level 15: Konsep Sudut Depresi",
+                question: "Dari atas mercusuar setinggi 30 meter, seorang pengawas melihat kapal dengan sudut depresi 30°. Berapakah jarak kapal dari kaki mercusuar (x)?",
+                visualSvg: `
+                    <svg viewBox="0 0 220 120" class="w-56 h-30 mx-auto">
+                        <rect x="25" y="35" width="25" height="70" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
+                        <line x1="10" y1="105" x2="210" y2="105" stroke="#0284c7" stroke-width="3"/>
+                        <line x1="37" y1="35" x2="170" y2="35" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="3"/>
+                        <line x1="37" y1="35" x2="170" y2="105" stroke="#e11d48" stroke-width="2"/>
+                        <text x="65" y="48" fill="#e11d48" font-weight="bold" font-size="11">30°</text>
+                        <text x="2" y="75" fill="#334155" font-weight="bold" font-size="9">30m</text>
+                        <text x="90" y="118" fill="#0369a1" font-weight="bold" font-size="10">Jarak (x)?</text>
+                    </svg>
+                `,
+                options: [
+                    { html: "30 meter", val: "30" },
+                    { html: "30√3 meter", val: "30sqrt3" },
+                    { html: "15√3 meter", val: "15sqrt3" },
+                    { html: "60 meter", val: "60" }
+                ],
+                correct: "30sqrt3"
+            },
+            {
+                id: 16,
+                level: "Level 16: Penerapan Sudut Depresi",
+                question: "Seseorang berada di atas tebing setinggi 50 meter melihat mobil di bawah dengan sudut depresi 45°. Jarak mobil ke dasar tebing adalah...?",
+                visualSvg: `
+                    <svg viewBox="0 0 220 120" class="w-56 h-30 mx-auto">
+                        <polygon points="10,35 60,35 60,105 10,105" fill="#94a3b8"/>
+                        <line x1="60" y1="35" x2="180" y2="35" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="3"/>
+                        <line x1="60" y1="35" x2="180" y2="105" stroke="#e11d48" stroke-width="2"/>
+                        <text x="85" y="50" fill="#e11d48" font-weight="bold" font-size="11">45°</text>
+                        <text x="15" y="75" fill="#ffffff" font-weight="bold" font-size="9">50m</text>
+                        <text x="100" y="118" fill="#334155" font-weight="bold" font-size="10">Jarak mobil?</text>
+                    </svg>
+                `,
+                options: [
+                    { html: "25 meter", val: "25" },
+                    { html: "50 meter", val: "50" },
+                    { html: "50√3 meter", val: "50sqrt3" },
+                    { html: "100 meter", val: "100" }
+                ],
+                correct: "50"
+            },
+
+            // LEVEL 17 - 20: Penerapan Sederhana Praktik SMK (Kuliner & SIJA)
+            {
+                id: 17,
+                level: "Level 17: Penerapan SMK Kuliner (Kemiringan Atap Dapur)",
+                question: "Atap Dapur Restoran SMK dirancang dengan sudut kemiringan 30°. Jika lebar setengah rangka atap adalah 6 meter, berapakah panjang sisi miring atap (s)?",
+                visualSvg: `
+                    <svg viewBox="0 0 220 120" class="w-56 h-30 mx-auto">
+                        <polygon points="20,100 180,100 20,40" fill="#ffedd5" stroke="#ea580c" stroke-width="2.5"/>
+                        <text x="110" y="95" fill="#c2410c" font-weight="bold" font-size="11">30°</text>
+                        <text x="80" y="115" fill="#1e293b" font-weight="bold" font-size="10">6 meter</text>
+                        <text x="90" y="60" fill="#ea580c" font-weight="bold" font-size="10">Atap (s)?</text>
+                    </svg>
+                `,
+                options: [
+                    { html: "4√3 meter", val: "4sqrt3" },
+                    { html: "6√3 meter", val: "6sqrt3" },
+                    { html: "8 meter", val: "8" },
+                    { html: "12 meter", val: "12" }
+                ],
+                correct: "4sqrt3"
+            },
+            {
+                id: 18,
+                level: "Level 18: Penerapan Nyata (Panjang Tangga Dinding)",
+                question: "Sebuah tangga sepanjang 6 meter disandarkan ke dinding. Tangga membentuk sudut 60° dengan lantai. Berapakah tinggi dinding yang dicapai tangga (t)?",
+                visualSvg: `
+                    <svg viewBox="0 0 200 120" class="w-52 h-30 mx-auto">
+                        <line x1="150" y1="15" x2="150" y2="100" stroke="#334155" stroke-width="4"/>
+                        <line x1="30" y1="100" x2="180" y2="100" stroke="#94a3b8" stroke-width="2"/>
+                        <line x1="60" y1="100" x2="150" y2="15" stroke="#d97706" stroke-width="4"/>
+                        <text x="85" y="55" fill="#b45309" font-weight="bold" font-size="10">6 meter</text>
+                        <text x="75" y="95" fill="#e11d48" font-weight="bold" font-size="10">60°</text>
+                        <text x="158" y="60" fill="#1e293b" font-weight="bold" font-size="10">tinggi (t)?</text>
+                    </svg>
+                `,
+                options: [
+                    { html: "3 meter", val: "3" },
+                    { html: "3√2 meter", val: "3sqrt2" },
+                    { html: "3√3 meter", val: "3sqrt3" },
+                    { html: "6√3 meter", val: "6sqrt3" }
+                ],
+                correct: "3sqrt3"
+            },
+            {
+                id: 19,
+                level: "Level 19: Penerapan SMK SIJA (Pemasangan Kawat Antena)",
+                question: "Siswa SIJA memasang tiang pemancar. Kawat pancang sepanjang 10 meter diikatkan dari puncak tiang ke tanah dengan sudut 30°. Berapakah jarak ikatan kawat di tanah ke dasar tiang?",
+                visualSvg: `
+                    <svg viewBox="0 0 220 120" class="w-56 h-30 mx-auto">
+                        <line x1="50" y1="15" x2="50" y2="100" stroke="#0284c7" stroke-width="4"/>
+                        <line x1="20" y1="100" x2="200" y2="100" stroke="#64748b" stroke-width="2"/>
+                        <line x1="50" y1="15" x2="170" y2="100" stroke="#e11d48" stroke-width="3"/>
+                        <text x="110" y="50" fill="#e11d48" font-weight="bold" font-size="10">10 meter</text>
+                        <text x="130" y="95" fill="#e11d48" font-weight="bold" font-size="10">30°</text>
+                        <text x="80" y="115" fill="#0369a1" font-weight="bold" font-size="10">Jarak (x)?</text>
+                    </svg>
+                `,
+                options: [
+                    { html: "5 meter", val: "5" },
+                    { html: "5√2 meter", val: "5sqrt2" },
+                    { html: "5√3 meter", val: "5sqrt3" },
+                    { html: "10√3 meter", val: "10sqrt3" }
+                ],
+                correct: "5sqrt3"
+            },
+            {
+                id: 20,
+                level: "Level 20: Penerapan Kombinasi (Tinggi Tiang Pemancar SIJA)",
+                question: "Berdasarkan gambar soal No. 19 di atas, berapakah tinggi tiang pemancar jaringan SIJA tersebut?",
+                visualSvg: `
+                    <svg viewBox="0 0 220 120" class="w-56 h-30 mx-auto">
+                        <line x1="50" y1="15" x2="50" y2="100" stroke="#0284c7" stroke-width="4"/>
+                        <line x1="20" y1="100" x2="200" y2="100" stroke="#64748b" stroke-width="2"/>
+                        <line x1="50" y1="15" x2="170" y2="100" stroke="#e11d48" stroke-width="3"/>
+                        <text x="110" y="50" fill="#e11d48" font-weight="bold" font-size="10">10 meter</text>
+                        <text x="130" y="95" fill="#e11d48" font-weight="bold" font-size="10">30°</text>
+                        <text x="5" y="60" fill="#0284c7" font-weight="bold" font-size="10">Tinggi tiang?</text>
+                    </svg>
+                `,
+                options: [
+                    { html: "5 meter", val: "5" },
+                    { html: "5√3 meter", val: "5sqrt3" },
+                    { html: "10 meter", val: "10" },
+                    { html: "10√3 meter", val: "10sqrt3" }
+                ],
+                correct: "5"
+            }
+        ];
+
+        // DETEKSI PINDAH TAB / BUKA APLIKASI LAIN
+        document.addEventListener('visibilitychange', () => {
+            if (isQuizActive && document.hidden) {
+                tabSwitchCount++;
+                const badge = document.getElementById('tab-warning-badge');
+                badge.classList.remove('hidden');
+                document.getElementById('tab-warning-count').innerText = `${tabSwitchCount}x Pindah Tab/App`;
+            }
+        });
+
+        // START STUDENT LOGIN
+        function handleStudentLogin(e) {
+            e.preventDefault();
+            const name = document.getElementById('student-name').value.trim();
+            const id = document.getElementById('student-id').value.trim();
+            const studentClass = document.getElementById('student-class').value;
+
+            if (!name || !id || !studentClass) {
+                showAlert("Peringatan", "Mohon lengkapi seluruh data identitas!", "warning");
+                return;
+            }
+
+            // Lock 1x Submit Check
+            const submittedKey = `submitted_${id}`;
+            if (localStorage.getItem(submittedKey)) {
+                showAlert("Sudah Mengerjakan", "Siswa dengan NIS ini telah menyelesaikan kuis sebelumnya (Maksimal 1x pengerjaan).", "error");
+                return;
+            }
+
+            if (window.allGradesData && window.allGradesData.some(g => g.nis === id)) {
+                localStorage.setItem(submittedKey, 'true');
+                showAlert("Sudah Mengerjakan", "Data pengerjaan kamu sudah tercatat di sistem guru.", "error");
+                return;
+            }
+
+            // Confirm & Save Active Student
+            activeStudent = { name, nis: id, class: studentClass };
+            document.getElementById('quiz-student-info').innerText = `${name} (${studentClass})`;
+            
+            // Render Quiz & Timers Initialization
+            document.getElementById('student-login-card').classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+
+            isQuizActive = true;
+            tabSwitchCount = 0;
+            currentQuestionIdx = 0;
+            renderSingleQuestion(currentQuestionIdx);
+            startTotalTimer();
+            startQuestionTimer();
+        }
+
+        // Render Current Question
+        function renderSingleQuestion(idx) {
+            const q = questions[idx];
+            const container = document.getElementById('single-question-box');
+            
+            document.getElementById('question-progress-text').innerText = `Soal ${idx + 1} dari ${questions.length}`;
+            
+            const btnNext = document.getElementById('btn-next-question');
+            if (idx === questions.length - 1) {
+                btnNext.innerHTML = `<span>Kumpulkan Jawaban</span> <i class="fa-solid fa-paper-plane text-xs"></i>`;
+                btnNext.className = "bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-6 py-2.5 rounded-xl shadow-md transition flex items-center gap-2";
+            } else {
+                btnNext.innerHTML = `<span>Soal Berikutnya</span> <i class="fa-solid fa-arrow-right text-xs"></i>`;
+                btnNext.className = "bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm px-6 py-2.5 rounded-xl shadow-md transition flex items-center gap-2";
+            }
+
+            const savedAnswer = studentAnswers[q.id] || "";
+
+            let optionsHtml = q.options.map((opt) => {
+                const isChecked = savedAnswer === opt.val ? 'checked' : '';
+                return `
+                    <label class="flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-indigo-50/50 hover:border-indigo-300 cursor-pointer transition">
+                        <input type="radio" name="q_option" value="${opt.val}" ${isChecked} onchange="saveCurrentAnswer('${q.id}', '${opt.val}')" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+                        <span class="text-sm font-semibold text-slate-700 flex items-center">${opt.html}</span>
+                    </label>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                    <span class="text-xs font-extrabold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full uppercase">Soal No. ${idx + 1}</span>
+                    <span class="text-xs font-semibold text-slate-400">${q.level}</span>
+                </div>
+                <div class="text-slate-800 font-medium text-base sm:text-lg leading-relaxed">
+                    ${q.question}
+                </div>
+                <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 flex justify-center">
+                    ${q.visualSvg}
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    ${optionsHtml}
+                </div>
+            `;
+        }
+
+        function saveCurrentAnswer(qId, val) {
+            studentAnswers[qId] = val;
+        }
+
+        // NEXT QUESTION / AUTO NEXT WHEN QUESTION TIMER EXPIRES
+        function nextQuestion(isAutoTimeOut = false) {
+            if (isAutoTimeOut) {
+                showAlert("Waktu Soal Habis", "Waktu 5 menit untuk soal ini telah habis. Soal otomatis berpindah.", "info");
+            }
+
+            if (currentQuestionIdx < questions.length - 1) {
+                currentQuestionIdx++;
+                renderSingleQuestion(currentQuestionIdx);
+                resetQuestionTimer();
+            } else {
+                submitQuiz();
+            }
+        }
+
+        // TIMERS SYSTEM
+        function startTotalTimer() {
+            updateTotalTimerDisplay();
+            totalTimerInterval = setInterval(() => {
+                totalTimeRemaining--;
+                updateTotalTimerDisplay();
+                if (totalTimeRemaining <= 0) {
+                    clearInterval(totalTimerInterval);
+                    clearInterval(questionTimerInterval);
+                    showAlert("Waktu Total Habis", "Waktu kuis 100 menit telah selesai! Jawaban kamu disimpan otomatis.", "info");
+                    submitQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateTotalTimerDisplay() {
+            const minutes = Math.floor(totalTimeRemaining / 60);
+            const seconds = totalTimeRemaining % 60;
+            document.getElementById('total-timer-display').innerText = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function startQuestionTimer() {
+            questionTimeRemaining = 5 * 60; // 5 Minutes
+            updateQuestionTimerDisplay();
+            questionTimerInterval = setInterval(() => {
+                questionTimeRemaining--;
+                updateQuestionTimerDisplay();
+                if (questionTimeRemaining <= 0) {
+                    clearInterval(questionTimerInterval);
+                    nextQuestion(true);
+                }
+            }, 1000);
+        }
+
+        function resetQuestionTimer() {
+            clearInterval(questionTimerInterval);
+            startQuestionTimer();
+        }
+
+        function updateQuestionTimerDisplay() {
+            const minutes = Math.floor(questionTimeRemaining / 60);
+            const seconds = questionTimeRemaining % 60;
+            document.getElementById('q-timer-display').innerText = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // SUBMIT QUIZ
+        async function submitQuiz() {
+            isQuizActive = false;
+            clearInterval(totalTimerInterval);
+            clearInterval(questionTimerInterval);
+
+            let correctCount = 0;
+            questions.forEach(q => {
+                if (studentAnswers[q.id] === q.correct) {
+                    correctCount++;
+                }
+            });
+
+            const score = correctCount * 5; // 20 Questions * 5 = Max 100
+
+            const submissionData = {
+                name: activeStudent.name,
+                nis: activeStudent.nis,
+                class: activeStudent.class,
+                score: score,
+                correctCount: correctCount,
+                tabSwitches: tabSwitchCount,
+                submittedAt: new Date().toLocaleString('id-ID'),
+                timestamp: Date.now()
+            };
+
+            // Lock 1x Rule
+            localStorage.setItem(`submitted_${activeStudent.nis}`, 'true');
+
+            // Save to Cloud
+            if (window.saveGradeToCloud) {
+                await window.saveGradeToCloud(submissionData);
+            }
+
+            // Show Student Result View
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('student-result-card').classList.remove('hidden');
+            document.getElementById('final-score-display').innerText = score;
+            document.getElementById('score-details').innerText = `${correctCount} dari 20 Soal Dijawab Benar`;
+
+            // Display Cheating / Tab Switching Warning Status
+            const cheatingBox = document.getElementById('cheating-status-box');
+            if (tabSwitchCount > 0) {
+                cheatingBox.className = "max-w-md mx-auto mb-4 p-3.5 rounded-xl text-xs font-semibold text-left bg-rose-50 border border-rose-200 text-rose-800";
+                cheatingBox.innerHTML = `
+                    <div class="font-bold flex items-center gap-1.5 text-rose-700 mb-1">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Catatan Pelanggaran Pengawasan:
+                    </div>
+                    <span>Terdeteksi <b>${tabSwitchCount} kali</b> meninggalkan layar kuis/membuka aplikasi lain saat ujian berlangsung. Catatan ini telah dilaporkan ke Guru.</span>
+                `;
+            } else {
+                cheatingBox.className = "max-w-md mx-auto mb-4 p-3.5 rounded-xl text-xs font-semibold text-left bg-emerald-50 border border-emerald-200 text-emerald-800";
+                cheatingBox.innerHTML = `
+                    <div class="font-bold flex items-center gap-1.5 text-emerald-700">
+                        <i class="fa-solid fa-circle-check"></i> Pengawasan Tertib:
+                    </div>
+                    <span>Sangat Baik! Anda mengerjakan kuis dengan jujur tanpa berpindah aplikasi/tab.</span>
+                `;
+            }
+        }
+
+        // ADMIN / GURU MODE LOGIC
+        function showAdminModal() {
+            document.getElementById('admin-pin-modal').classList.remove('hidden');
+            document.getElementById('admin-pin-input').value = "";
+            document.getElementById('admin-pin-input').focus();
+        }
+
+        function hideAdminModal() {
+            document.getElementById('admin-pin-modal').classList.add('hidden');
+        }
+
+        function verifyAdminPIN() {
+            const inputPin = document.getElementById('admin-pin-input').value.trim();
+            
+            // Rahasia PIN: 3403
+            if (inputPin === SECRET_PIN) {
+                hideAdminModal();
+                window.isAdminActive = true;
+                showAdminDashboard();
+            } else {
+                hideAdminModal();
+            }
+        }
+
+        function showAdminDashboard() {
+            document.getElementById('student-login-card').classList.add('hidden');
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('student-result-card').classList.add('hidden');
+            document.getElementById('admin-dashboard').classList.remove('hidden');
+            renderAdminTable();
+        }
+
+        function exitAdminMode() {
+            window.isAdminActive = false;
+            document.getElementById('admin-dashboard').classList.add('hidden');
+            document.getElementById('student-login-card').classList.remove('hidden');
+        }
+
+        function renderAdminTable() {
+            const tbody = document.getElementById('grades-table-body');
+            const selectedClass = document.getElementById('filter-class').value;
+            let data = window.allGradesData || [];
+
+            if (selectedClass !== 'ALL') {
+                data = data.filter(g => g.class === selectedClass);
+            }
+
+            const totalStudents = data.length;
+            document.getElementById('stat-submitted').innerText = `${totalStudents}`;
+            
+            if (totalStudents > 0) {
+                const totalScore = data.reduce((acc, curr) => acc + (curr.score || 0), 0);
+                const avgScore = (totalScore / totalStudents).toFixed(1);
+                document.getElementById('stat-average').innerText = avgScore;
+            } else {
+                document.getElementById('stat-average').innerText = "0";
+            }
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">Belum ada data nilai siswa yang masuk dari Cloud.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.map((row, idx) => {
+                const tabWarn = (row.tabSwitches && row.tabSwitches > 0) 
+                    ? `<span class="bg-rose-100 text-rose-700 text-xs px-2 py-1 rounded-md font-bold flex items-center gap-1 w-max"><i class="fa-solid fa-triangle-exclamation"></i> ${row.tabSwitches}x Pindah Tab</span>`
+                    : `<span class="bg-emerald-100 text-emerald-700 text-xs px-2 py-1 rounded-md font-bold flex items-center gap-1 w-max"><i class="fa-solid fa-check"></i> Tertib</span>`;
+
+                return `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-4 font-semibold text-slate-500">${idx + 1}</td>
+                        <td class="p-4 font-bold text-slate-800">${row.name}</td>
+                        <td class="p-4 text-slate-600 font-mono">${row.nis}</td>
+                        <td class="p-4"><span class="bg-indigo-100 text-indigo-700 text-xs px-2.5 py-1 rounded-md font-bold">${row.class}</span></td>
+                        <td class="p-4">${tabWarn}</td>
+                        <td class="p-4 text-slate-500 text-xs">${row.submittedAt}</td>
+                        <td class="p-4 text-center font-extrabold text-indigo-600 text-base">${row.score}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Export PDF
+        function exportToPDF() {
+            let data = window.allGradesData || [];
+            if (data.length === 0) {
+                showAlert("Informasi", "Belum ada data nilai untuk diunduh.", "info");
+                return;
+            }
+
+            const element = document.createElement('div');
+            element.style.padding = '20px';
+            element.style.fontFamily = 'Arial, sans-serif';
+
+            let rowsHtml = data.map((row, idx) => `
+                <tr style="border-bottom: 1px solid #cbd5e1; text-align: left;">
+                    <td style="padding: 8px;">${idx + 1}</td>
+                    <td style="padding: 8px;"><b>${row.name}</b></td>
+                    <td style="padding: 8px;">${row.nis}</td>
+                    <td style="padding: 8px;">${row.class}</td>
+                    <td style="padding: 8px;">${row.tabSwitches > 0 ? `${row.tabSwitches}x Pindah Tab` : 'Tertib'}</td>
+                    <td style="padding: 8px; text-align: center; color: #4f46e5; font-weight: bold;">${row.score}</td>
+                </tr>
+            `).join('');
+
+            element.innerHTML = `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2 style="margin: 0; color: #1e1b4b;">Laporan Rekap Nilai Kuis Trigonometri XI SMK</h2>
+                    <p style="margin: 5px 0 0; color: #64748b; font-size: 12px;">Diunduh pada: ${new Date().toLocaleString('id-ID')}</p>
+                </div>
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                    <thead>
+                        <tr style="background-color: #f1f5f9; text-align: left; border-bottom: 2px solid #94a3b8;">
+                            <th style="padding: 8px;">No</th>
+                            <th style="padding: 8px;">Nama Siswa</th>
+                            <th style="padding: 8px;">NIS</th>
+                            <th style="padding: 8px;">Kelas</th>
+                            <th style="padding: 8px;">Pengawasan</th>
+                            <th style="padding: 8px; text-align: center;">Nilai</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rowsHtml}
+                    </tbody>
+                </table>
+            `;
+
+            const opt = {
+                margin:       10,
+                filename:     `Rekap_Nilai_Trigonometri_${new Date().toISOString().slice(0,10)}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save();
+        }
+
+        // Export CSV
+        function exportToCSV() {
+            let data = window.allGradesData || [];
+            if (data.length === 0) {
+                showAlert("Informasi", "Belum ada data nilai untuk diunduh.", "info");
+                return;
+            }
+
+            let csv = "No,Nama Siswa,NIS,Rombel Kelas,Pelanggaran Pindah Tab,Waktu Selesai,Nilai\n";
+            data.forEach((row, idx) => {
+                csv += `"${idx + 1}","${row.name}","${row.nis}","${row.class}","${row.tabSwitches || 0}x Pindah Tab","${row.submittedAt}","${row.score}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Rekap_Nilai_Trigonometri_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+        }
+
+        // Custom Alert Modal
+        function showAlert(title, msg, type = "info") {
+            const modal = document.getElementById('alert-modal');
+            const titleEl = document.getElementById('alert-title');
+            const msgEl = document.getElementById('alert-msg');
+            const iconEl = document.getElementById('alert-icon');
+
+            titleEl.innerText = title;
+            msgEl.innerText = msg;
+
+            if (type === "warning" || type === "error") {
+                iconEl.className = "w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl bg-amber-100 text-amber-600";
+                iconEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            } else {
+                iconEl.className = "w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl bg-indigo-100 text-indigo-600";
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-info"></i>';
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeAlertModal() {
+            document.getElementById('alert-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
